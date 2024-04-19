@@ -110,8 +110,7 @@ Here are the list of allowed configurations for this handler (on top of the stan
 
 ### parameters_callable
 
-The `parameters_callable` is provided with the following kwargs:
-
+The `parameters_callable` is provided with the following kwargs
 | Name                 | Type                                   | Value |
 |----------------------|----------------------------------------|-------|
 | `input_output`       | `clearskies.input_outputs.InputOutput` | The input output object for the request |
@@ -139,7 +138,7 @@ The `output_callable` is provided with the following kwargs:
 
 ### Example
 
-Here's an example of using the CreateSetupIntent callable.  This example assumes that the stripe customer id is stored in the JWT in the key `stripe_customer_id`, and so it uses that fact in conjunction with the `parameters_callable` to set the customer id on the setup intent:
+Here's an example of using the CreateSetupIntent handler.  This example assumes that the stripe customer id is stored in the JWT in the key `stripe_customer_id`, and so it uses that fact in conjunction with the `parameters_callable` to set the customer id on the setup intent:
 
 ```
 import clearskies
@@ -157,7 +156,7 @@ application = clearskies.Application(
             {
                 "path": "/setup_intent",
                 "methods": "POST",
-                "handler_class": clearskies_stripe.handlers.SetupIntent,
+                "handler_class": clearskies_stripe.handlers.CreateSetupIntent,
                 "handler_config": {
                     "usage": "off_session",
                     "parameters_callable": add_stripe_customer,
