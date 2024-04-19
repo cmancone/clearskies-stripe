@@ -12,11 +12,13 @@ pip install clear-skies-stripe
 
 # Usage
 
+## Authentication
+
 This module has a variety of actions and handlers which take care of the stripe integration.  However, before you can use any of them, you must setup the stripe module with clearskies and tell it how to authenticate to Stripe.  The module assumes that your Stripe API key is stored in your secret manager, so you just have to tell it the path to the API key in your secret manager.
 
 **IMPORTANT**: This module is designed to fetch your Stripe API key only when needed and will automatically re-fetch the key from the secrets manager in the event of an authentication failure.  As a result, you can rotate your Stripe API key at anytime: just drop the new API key in your secret manager and your running processes will automatically find it and use it without needing to restart/rebuild/relaunch the application.
 
-In the following example, we configure a clearskies application to use AWS Secrets Manager for the storage of secrets, and then we tell the Stripe integration to fetch its api key from `/path/to/stripe/api/key` in AWS Secrets Manager.
+In the following example, we configure a clearskies application to use AWS Secrets Manager for the storage of secrets, and then we tell the Stripe integration to fetch its api key from `/path/to/stripe/(api|publishable)/key` in AWS Secrets Manager.  Of course, you can use any secrets manager you want: just swap out `secrets` in the dependency injection configuration.
 
 ```
 import clearskies
@@ -30,15 +32,52 @@ application = clearskies.Application(
     },
     bindings={
         "stripe": clearskies_stripe.di.stripe(
-            "/path/to/stripe/api/key/in/secrets/manager",
-            "/path/to/stripe/publishable/key/in/secrets/manager",
+            "/path/to/stripe/api/key",
+            "/path/to/stripe/publishable/key",
         ),
         "secrets": clearskies_aws.secrets.SecretsManager,
     },
 )
 ```
 
-## SetupInents
+## Models
+
+To use any of the models you must import the `clearskies_stripe` module into your application (you still have to configure authentication per the above):
+
+```
+import clearskies
+import clearskies_stripe
+import clearskies_aws
+
+application = clearskies.Application(
+    SomeHandler,
+    {
+        "your": "application config",
+    },
+    binding_modules=[
+        clearskies_stripe,
+    ],
+    bindings={
+        "stripe": clearskies_stripe.di.stripe(
+            "/path/to/stripe/api/key",
+            "/path/to/stripe/publishable/key",
+        ),
+        "secrets": clearskies_aws.secrets.SecretsManager,
+    },
+)
+```
+
+## Models
+
+This module comes with a limited selection of models.  The columns available in each model match those published via the Stripe API.
+
+| Model               | DI name               | Stripe Docs |
+|---------------------|-----------------------|-------------|
+| StripeCustomer      | stripe_customer       | TBD |
+| StripePayment       | stripe_payment        | TBD |
+| StripePaymentMethod | stripe_payment_method | TBD |
+
+## SetupIntent Handler
 
 This handler creates a SetupIntent and returns the details of it, as well as the publishable key.  You can specify any of the parameters for the [create call].  In addition, you can provide `parameters_callable` which can change all the parameters that will be passed to the create call, and you can also provide `output_callable` which changes the response from the handler.  By default, the handler returns the full details of the response from the create call, as well as your publishable key.
 
@@ -46,28 +85,28 @@ This handler creates a SetupIntent and returns the details of it, as well as the
 
 Here are the list of allowed configurations for this handler (on top of the standard handler configs).  All configs are optional.  With the exception of the callables (described below), all configuration options will be passed along as-is in the call to `stripe.setup_intents.create()`.  See [the stripe docs](https://docs.stripe.com/api/setup_intents/create) for more details:
 
-| Name                           | Type |
-|--------------------------------|------|
-| `automatic_payment_methods`    | `dict` |
-| `confirm`                      | `bool` |
-| `description`                  | `str` |
-| `metadata`                     | `dict` |
-| `payment_method`               | `str` |
-| `usage`                        | `str` |
-| `attach_to_self`               | `bool` |
-| `confirmation_token`           | `str` |
+| Name                           | Type        |
+|--------------------------------|-------------|
+| `automatic_payment_methods`    | `dict`      |
+| `confirm`                      | `bool`      |
+| `description`                  | `str`       |
+| `metadata`                     | `dict`      |
+| `payment_method`               | `str`       |
+| `usage`                        | `str`       |
+| `attach_to_self`               | `bool`      |
+| `confirmation_token`           | `str`       |
 | `flow_directions`              | `list[str]` |
-| `mandate_data`                 | `dict` |
-| `on_behalf_of`                 | `str` |
-| `payment_method_configuration` | `str` |
-| `payment_method_data,`         | `dict` |
-| `payment_method_options`       | `dict` |
+| `mandate_data`                 | `dict`      |
+| `on_behalf_of`                 | `str`       |
+| `payment_method_configuration` | `str`       |
+| `payment_method_data,`         | `dict`      |
+| `payment_method_options`       | `dict`      |
 | `payment_method_types`         | `list[str]` |
-| `return_url`                   | `str` |
-| `single_use`                   | `dict` |
-| `use_stripe_sdk`               | `bool` |
-| `parameters_callable`          | `Callable` |
-| `output_callable`              | `Callable` |
+| `return_url`                   | `str`       |
+| `single_use`                   | `dict`      |
+| `use_stripe_sdk`               | `bool`      |
+| `parameters_callable`          | `Callable`  |
+| `output_callable`              | `Callable`  |
 
 ### parameters_callable
 

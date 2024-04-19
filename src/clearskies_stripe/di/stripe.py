@@ -72,10 +72,7 @@ class StripeWrapper:
         try:
             response = chain(*args, **kwargs)
         except stripe.error.AuthenticationError as e:
-            # try again without the
-
-
-            cache (e.g. fetch a new api key)
+            # try again without the cache (e.g. fetch a new api key)
             if cache:
                 return self.__call__(*args, **kwargs, cache=False)
             else:
