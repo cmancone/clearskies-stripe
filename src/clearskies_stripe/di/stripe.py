@@ -42,8 +42,11 @@ class Stripe:
         if self._stripe is not None and cache:
             return self._stripe
 
+        # this call has to go to the module itself
+        stripe.set_app_info("clear-skies-stripe", url="https://github.com/cmancone/clearskies-stripe")
+        # but the easiest way to have flexible credentials is to directly instantiate a StripeClient
+        # rather than using the module directly
         self._stripe = stripe.StripeClient(self.secrets.get(self.path_to_api_key))
-        self._stripe.set_app_info("clear-skies-stripe", url="https://github.com/cmancone/clearskies-stripe")
         return self._stripe
 
     def get_publishable_key(self) -> str:
