@@ -86,7 +86,7 @@ class CreateSetupIntent(Base):
                 raise ValueError("parameters_callable for handler " + (self.__class__.__name__) + " must return a dictionary, but returned something else.")
 
         response = {
-            **self.stripe.setup_intents.create(**stripe_kwargs),
+            **self.stripe.setup_intents.create(stripe_kwargs),
             "publishable_key": self.stripe.get_publishable_key(),
         }
         output_callable = self._configuration.get("output_callable")

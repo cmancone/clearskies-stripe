@@ -29,7 +29,7 @@ class CreateSetupIntentTest(unittest.TestCase):
         response_data = response[0]["data"]
         self.assertEqual(200, response[1])
         self.assertEqual({"client_secret":"super secret", "id": "seti_asdf", "publishable_key": "pk_asdfer"}, response_data)
-        self.stripe.setup_intents.create.assert_called_with(confirm=True, payment_method_options={"hey": "sup"})
+        self.stripe.setup_intents.create.assert_called_with({"confirm": True, "payment_method_options":{"hey": "sup"}})
 
     def paramaters_callable(self, input_output):
         return {
@@ -56,7 +56,7 @@ class CreateSetupIntentTest(unittest.TestCase):
         response_data = response[0]["data"]
         self.assertEqual(200, response[1])
         self.assertEqual({"client_secret":"super secret", "id": "seti_asdf", "publishable_key": "pk_asdfer"}, response_data)
-        self.stripe.setup_intents.create.assert_called_with(confirm=False, payment_method_options={"hey": "sup"}, customer="cust_asdfer", route="/path/to/my/route")
+        self.stripe.setup_intents.create.assert_called_with({"confirm":False, "payment_method_options":{"hey": "sup"}, "customer":"cust_asdfer", "route": "/path/to/my/route"})
 
     def output_map(self, response, input_output):
         return {
@@ -83,4 +83,4 @@ class CreateSetupIntentTest(unittest.TestCase):
         response_data = response[0]["data"]
         self.assertEqual(200, response[1])
         self.assertEqual({"client_secret":"super secret", "id": "seti_asdf", "publishable_key": "pk_asdfer", "route": "/path/to/my/route", "hello": "world"}, response_data)
-        self.stripe.setup_intents.create.assert_called_with(confirm=True, payment_method_options={"hey": "sup"})
+        self.stripe.setup_intents.create.assert_called_with({"confirm":True, "payment_method_options":{"hey": "sup"}})
