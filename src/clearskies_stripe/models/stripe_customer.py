@@ -1,5 +1,5 @@
 import clearskies
-from clearskies.column_types import boolean, integer, json, string
+from clearskies.column_types import boolean, integer, json, string, timestamp
 from collections import OrderedDict
 
 
