@@ -57,5 +57,6 @@ class StripeCharge(clearskies.Model):
                 select("status", values=["succeeded", "pending", "failed"]),
                 json("transfer_data"),
                 string("transfer_group"),
+                string("customer"),
             ]
         )

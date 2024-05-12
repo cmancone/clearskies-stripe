@@ -20,5 +20,6 @@ class StripePaymentMethod(clearskies.Model):
                 string("object"),
                 json("billing_details"),
                 json("card"),
+                string("customer"),
             ]
         )

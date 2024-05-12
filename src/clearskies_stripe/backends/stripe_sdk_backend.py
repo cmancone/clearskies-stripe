@@ -34,35 +34,42 @@ class StripeSdkBackend(Backend):
     def records(
         self, configuration: Dict[str, Any], model: clearskies.Model, next_page_data: Dict[str, str] = None
     ) -> List[Dict[str, Any]]:
-        kwargs = {where["column"]: where["values"][0] for where in configuration.get("wheres", [])}
+        params = {where["column"]: where["values"][0] for where in configuration.get("wheres", [])}
+        options = {}
         if configuration.get("limit"):
-            kwargs["limit"] = configuration.get("limit")
-        next_page = configuration.get('pagination', {}).get('next_page')
-        if next_page:
-            kwargs["page"] = next_page
-        return getattr(self.stripe, model.table_name()).list(**kwargs)
+            params["limit"] = configuration.get("limit")
+        starting_after = configuration.get('pagination', {}).get('starting_after')
+        if starting_after:
+            params["starting_after"] = starting_after
 
-    def validate_pagination_kwargs(self, kwargs: Dict[str, Any]) -> str:
+        results = getattr(self.stripe, model.table_name()).list(params=params, options=options)
+
+        if results.get("has_more"):
+            next_page_data["starting_after"] = results["data"][-1]["id"]
+
+        return results["data"]
+
+    def validate_pagination_kwargs(self, kwargs: Dict[str, Any], case_mapping: Callable) -> str:
         extra_keys = set(kwargs.keys()) - set(self.allowed_pagination_keys())
         if len(extra_keys):
-            key_name = case_mapping('next_page')
+            key_name = case_mapping('starting_after')
             return "Invalid pagination key(s): '" + "','".join(extra_keys) + f"'.  Only '{key_name}' is allowed"
-        if 'next_page' not in kwargs:
-            key_name = case_mapping('next_page')
+        if 'starting_after' not in kwargs:
+            key_name = case_mapping('starting_after')
             return f"You must specify '{key_name}' when setting pagination"
         return ''
 
     def allowed_pagination_keys(self) -> List[str]:
-        return ["next_page"]
+        return ["starting_after"]
 
     def documentation_pagination_next_page_response(self, case_mapping: Callable) -> List[Any]:
-        return [AutoDocString(case_mapping('next_page'))]
+        return [AutoDocString(case_mapping('starting_after'))]
 
     def documentation_pagination_next_page_example(self, case_mapping: Callable) -> Dict[str, Any]:
-        return {case_mapping('next_page'): 'eyJpZCI6IHsiUyI6ICIzODM0MyJ9fQ=='}
+        return {case_mapping('starting_after'): 'cus_asdfer'}
 
     def documentation_pagination_parameters(self, case_mapping: Callable) -> List[Tuple[Any]]:
         return [(
-            AutoDocString(case_mapping('next_page'),
-                          example='eyJpZCI6IHsiUyI6ICIzODM0MyJ9fQ=='), 'A token to fetch the next page of results'
+            AutoDocString(case_mapping('starting_after'),
+                          example='cus_asdfer'), 'A token to fetch the next page of results'
         )]
