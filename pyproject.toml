@@ -2,7 +2,7 @@
 
 [tool.poetry]
 name = "clear-skies-stripe"
-version = "0.9.7"
+version = "0.9.8"
 description = "clearskies bindings for working with Stripe"
 authors = [
     "Conor Mancone <cmancone@gmail.com>",

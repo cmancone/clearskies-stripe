@@ -1,5 +1,5 @@
 import clearskies
-from clearskies.column_types import json, string
+from clearskies.column_types import boolean, json, string, timestamp
 from collections import OrderedDict
 
 
@@ -21,5 +21,9 @@ class StripePaymentMethod(clearskies.Model):
                 json("billing_details"),
                 json("card"),
                 string("customer"),
+                timestamp("created"),
+                boolean("livemode"),
+                json("metadata"),
+                string("type"),
             ]
         )
