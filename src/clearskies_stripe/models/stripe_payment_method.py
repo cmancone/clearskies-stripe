@@ -27,3 +27,22 @@ class StripePaymentMethod(clearskies.Model):
                 string("type"),
             ]
         )
+
+    def charge_off_session(self, amount):
+        """
+        Make an off session charge against the payment method.
+
+        The amount should be in USD.
+
+        Note that this will not work for more advanced payment methods/forms that require customer interaction.
+        """
+        if not self.exists:
+            raise ValueError("Cannot create a charge for a non-existent payment method")
+
+        # grab the stripe object from our backend so I can be lazy and not inject another parameter
+        return self.backend.stripe.payment_intents.create(params={
+            "amount": amount*100,
+            "currency": "usd",
+            "confirm": True,
+            "payment_method": self.id,
+        })
