@@ -17,6 +17,7 @@ class StripeCharge(clearskies.Model):
         return OrderedDict(
             [
                 string("id"),
+                string("environment", is_temporary=True),
                 string("object"),
                 integer("amount"),
                 integer("amount_captured"),

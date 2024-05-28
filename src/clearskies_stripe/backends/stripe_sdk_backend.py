@@ -41,8 +41,12 @@ class StripeSdkBackend(Backend):
         starting_after = configuration.get('pagination', {}).get('starting_after')
         if starting_after:
             params["starting_after"] = starting_after
+        environment = None
+        if "environment" in params:
+            environment = params["environment"]
+            del params["environment"]
 
-        results = getattr(self.stripe, model.table_name()).list(params=params, options=options)
+        results = getattr(self.stripe, model.table_name()).list(params=params, options=options, environment=environment)
 
         if results.get("has_more"):
             next_page_data["starting_after"] = results["data"][-1]["id"]
