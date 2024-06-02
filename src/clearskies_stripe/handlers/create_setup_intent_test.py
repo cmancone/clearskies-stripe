@@ -31,6 +31,46 @@ class CreateSetupIntentTest(unittest.TestCase):
         self.assertEqual({"client_secret":"super secret", "id": "seti_asdf", "publishable_key": "pk_asdfer"}, response_data)
         self.stripe.setup_intents.create.assert_called_with({"confirm": True, "payment_method_options":{"hey": "sup"}})
 
+    def test_environment_string(self):
+        create_setup_intent = clearskies.contexts.test(
+            {
+                "handler_class": CreateSetupIntent,
+                "handler_config": {
+                    "confirm": True,
+                    "payment_method_options": {"hey":"sup"},
+                    "environment": "testing",
+                },
+            },
+            bindings={
+                "stripe": self.stripe
+            },
+        )
+        response = create_setup_intent()
+        response_data = response[0]["data"]
+        self.assertEqual(200, response[1])
+        self.assertEqual({"client_secret":"super secret", "id": "seti_asdf", "publishable_key": "pk_asdfer"}, response_data)
+        self.stripe.setup_intents.create.assert_called_with({"confirm": True, "payment_method_options":{"hey": "sup"}}, environment="testing")
+
+    def test_environment_callable(self):
+        create_setup_intent = clearskies.contexts.test(
+            {
+                "handler_class": CreateSetupIntent,
+                "handler_config": {
+                    "confirm": True,
+                    "payment_method_options": {"hey":"sup"},
+                    "environment": lambda: "testing",
+                },
+            },
+            bindings={
+                "stripe": self.stripe
+            },
+        )
+        response = create_setup_intent()
+        response_data = response[0]["data"]
+        self.assertEqual(200, response[1])
+        self.assertEqual({"client_secret":"super secret", "id": "seti_asdf", "publishable_key": "pk_asdfer"}, response_data)
+        self.stripe.setup_intents.create.assert_called_with({"confirm": True, "payment_method_options":{"hey": "sup"}}, environment="testing")
+
     def paramaters_callable(self, input_output):
         return {
             "customer":  "cust_asdfer",

@@ -23,6 +23,7 @@ class CreateSetupIntent(Base):
         "use_stripe_sdk": None,
         "parameters_callable": None,
         "output_callable": None,
+        "environment": None,
     }
 
     # these are the config options that get passed along to our create_setup_intent call to stripe
@@ -58,12 +59,16 @@ class CreateSetupIntent(Base):
             raise ValueError(f"{error_prefix} 'parameters_callable' must be a callable")
         if configuration.get("output_callable") is not None and not callable(configuration["output_callable"]):
             raise ValueError(f"{error_prefix} 'output_callable' must be a callable")
+        environment = configuration.get("environment")
+        if environment and not isinstance(environment, str) and not callable(environment):
+            raise ValueError(f"{error_prefix} 'environment must be either a string with an environment name or a callable that retunrs the environment name.  Instead, it was something of type '{environment.__class__.__name__}")
 
     def handle(self, input_output):
         # grab all the config keys that are for stripe arguments
-        stripe_kwargs = {
+        stripe_params = {
             key: self._configuration[key] for key in self._create_setup_intent_kwargs if self._configuration.get(key) is not None
         }
+        stripe_kwargs = {}
 
         callable_kwargs = {
             "input_output": input_output,
@@ -75,18 +80,29 @@ class CreateSetupIntent(Base):
 
         parameters_callable = self._configuration.get("parameters_callable")
         if parameters_callable is not None:
-            stripe_kwargs = {
-                **stripe_kwargs,
+            stripe_params = {
+                **stripe_params,
                 **self._di.call_function(
                     parameters_callable,
                     **callable_kwargs,
                 )
             }
-            if not isinstance(stripe_kwargs, dict):
+            if not isinstance(stripe_params, dict):
                 raise ValueError("parameters_callable for handler " + (self.__class__.__name__) + " must return a dictionary, but returned something else.")
 
+        environment_config = self._configuration.get("environment")
+        if environment_config:
+            # our environment configuration is either the name of the environment or a function to call that returns the name of the environment
+            if isinstance(environment_config, str):
+                environment = environment_config
+            else:
+                environment = self._di.call_function(environment_config, **callable_kwargs)
+                if not isinstance(environment, str):
+                    raise ValueError(f"Error in handler {self.__class__.__name__} I have an environment callable, '{environment_config.__name__}', but when I called it it retruned an object of type '{environment.__class__.__name__}'.  It needs to return a string to specify the name of the environment that I have to work with")
+            stripe_kwargs["environment"] = environment
+
         response = {
-            **self.stripe.setup_intents.create(stripe_kwargs),
+            **self.stripe.setup_intents.create(stripe_params, **stripe_kwargs),
             "publishable_key": self.stripe.get_publishable_key(),
         }
         output_callable = self._configuration.get("output_callable")

@@ -66,7 +66,6 @@ class Stripe:
         # rather than using the module directly
         [path_to_api_key, path_to_publishable_key] = self.paths_for_environment(environment)
         api_key = self.secrets.get(path_to_api_key)
-        print(api_key)
         if not environment:
             self._stripe = stripe.StripeClient(api_key)
             return self._stripe
