@@ -100,10 +100,10 @@ class StripeWrapper:
     def __call__(self, *args, **kwargs):
         cache = True
         environment = None
-        if cache in kwargs:
+        if "cache" in kwargs:
             cache = kwargs["cache"]
             del kwargs["cache"]
-        if environment in kwargs:
+        if "environment" in kwargs:
             environment = kwargs["environment"]
             del kwargs["environment"]
 

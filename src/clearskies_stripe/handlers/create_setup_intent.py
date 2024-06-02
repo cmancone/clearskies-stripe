@@ -97,13 +97,13 @@ class CreateSetupIntent(Base):
                 environment = environment_config
             else:
                 environment = self._di.call_function(environment_config, **callable_kwargs)
-                if not isinstance(environment, str):
+                if environment is not None and not isinstance(environment, str):
                     raise ValueError(f"Error in handler {self.__class__.__name__} I have an environment callable, '{environment_config.__name__}', but when I called it it retruned an object of type '{environment.__class__.__name__}'.  It needs to return a string to specify the name of the environment that I have to work with")
             stripe_kwargs["environment"] = environment
 
         response = {
             **self.stripe.setup_intents.create(stripe_params, **stripe_kwargs),
-            "publishable_key": self.stripe.get_publishable_key(),
+            "publishable_key": self.stripe.get_publishable_key(**stripe_kwargs),
         }
         output_callable = self._configuration.get("output_callable")
         if output_callable is not None:
