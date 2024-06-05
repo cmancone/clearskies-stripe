@@ -17,7 +17,7 @@ class StripeCustomer(clearskies.Model):
         return OrderedDict(
             [
                 string("id"),
-                string("environment", is_temporary=True),
+                string("environment"),
                 string("address"),
                 string("currency"),
                 timestamp("created"),

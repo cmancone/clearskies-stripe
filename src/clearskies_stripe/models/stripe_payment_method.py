@@ -17,7 +17,7 @@ class StripePaymentMethod(clearskies.Model):
         return OrderedDict(
             [
                 string("id"),
-                string("environment", is_temporary=True),
+                string("environment"),
                 string("object"),
                 json("billing_details"),
                 json("card"),
