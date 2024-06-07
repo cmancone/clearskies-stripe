@@ -29,7 +29,8 @@ class StripeSdkBackend(Backend):
         return getattr(self.stripe, model.table_name()).delete(model.get(model.id_column_alt_name))
 
     def count(self, configuration: Dict[str, Any], model: clearskies.Model) -> int:
-        raise ValueError("Not Supported")
+        # not accurate, but a starting point for now.
+        return len(self.records(configuration, model))
 
     def records(
         self, configuration: Dict[str, Any], model: clearskies.Model, next_page_data: Dict[str, str] = None
