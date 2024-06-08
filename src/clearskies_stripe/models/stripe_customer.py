@@ -1,5 +1,6 @@
 import clearskies
-from clearskies.column_types import boolean, integer, json, string, timestamp
+from clearskies.column_types import boolean, integer, string, timestamp
+from .column_types import stripe_object
 from collections import OrderedDict
 
 
@@ -27,14 +28,14 @@ class StripeCustomer(clearskies.Model):
                 string("discount"),
                 string("email"),
                 string("invoice_prefix"),
-                json("invoice_settings"),
+                stripe_object("invoice_settings"),
                 boolean("livemode"),
-                json("metadata"),
+                stripe_object("metadata"),
                 string("name"),
                 string("phone"),
                 integer("next_invoice_sequence"),
                 string("object"),
-                json("preferred_locales"),
+                stripe_object("preferred_locales"),
                 string("shipping"),
                 string("tax_exempt"),
                 string("test_clock"),

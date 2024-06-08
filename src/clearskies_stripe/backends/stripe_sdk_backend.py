@@ -35,7 +35,13 @@ class StripeSdkBackend(Backend):
     def records(
         self, configuration: Dict[str, Any], model: clearskies.Model, next_page_data: Dict[str, str] = None
     ) -> List[Dict[str, Any]]:
-        params = {where["column"]: where["values"][0] for where in configuration.get("wheres", [])}
+        id_search = ""
+        params = {}
+        for where in configuration.get("wheres", []):
+            if where["column"] == "id":
+                id_search = where["values"][0]
+                continue
+            params[where["column"]] = where["values"][0]
         options = {}
         if configuration.get("limit"):
             params["limit"] = configuration.get("limit")
@@ -47,7 +53,13 @@ class StripeSdkBackend(Backend):
             environment = params["environment"]
             del params["environment"]
 
-        results = getattr(self.stripe, model.table_name()).list(params=params, options=options, environment=environment)
+        if id_search:
+            results = {
+                "has_more": False,
+                "data": [getattr(self.stripe, model.table_name()).retrieve(id_search, options=options, environment=environment)]
+            }
+        else:
+            results = getattr(self.stripe, model.table_name()).list(params=params, options=options, environment=environment)
 
         if results.get("has_more"):
             next_page_data["starting_after"] = results["data"][-1]["id"]

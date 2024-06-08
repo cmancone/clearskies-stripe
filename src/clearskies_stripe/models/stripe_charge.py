@@ -1,5 +1,6 @@
 import clearskies
-from clearskies.column_types import boolean, integer, json, string, timestamp
+from clearskies.column_types import boolean, integer, string, timestamp
+from .column_types import stripe_object
 from collections import OrderedDict
 
 
@@ -26,7 +27,7 @@ class StripeCharge(clearskies.Model):
                 string("application_fee"),
                 integer("application_amount"),
                 string("balance_transaction"),
-                json("billing_details"),
+                stripe_object("billing_details"),
                 string("calculated_statement_descriptor"),
                 boolean("captured"),
                 timestamp("created"),
@@ -37,26 +38,26 @@ class StripeCharge(clearskies.Model):
                 string("failure_balance_transaction"),
                 string("failure_code"),
                 string("failure_message"),
-                json("fraud_details"),
+                stripe_object("fraud_details"),
                 string("invoice"),
-                json("metadata"),
+                stripe_object("metadata"),
                 string("on_behalf_of"),
-                json("outcome"),
+                stripe_object("outcome"),
                 boolean("paid"),
                 string("payment_intent"),
                 string("payment_method"),
-                json("payment_method_details"),
+                stripe_object("payment_method_details"),
                 string("receipt_email"),
                 string("receipt_number"),
                 string("receipt_url"),
                 boolean("refunded"),
                 string("review"),
-                json("shipping"),
+                stripe_object("shipping"),
                 string("source_transfer"),
                 string("statement_descriptor"),
                 string("statement_descriptor_suffix"),
                 select("status", values=["succeeded", "pending", "failed"]),
-                json("transfer_data"),
+                stripe_object("transfer_data"),
                 string("transfer_group"),
                 string("customer"),
             ]
