@@ -111,7 +111,7 @@ class StripeWrapper:
         for name in self.path:
             chain = getattr(chain, name, None)
             if chain is None:
-                raise ValueError("Requested non-existent function from stripe: stripe." + ".".join(self.name))
+                raise ValueError("Requested non-existent function from stripe: stripe." + ".".join(self.path))
 
         try:
             response = chain(*args, **kwargs)

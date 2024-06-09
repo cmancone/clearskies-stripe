@@ -20,13 +20,21 @@ class StripeSdkBackend(Backend):
         self.stripe = stripe
 
     def update(self, id: str, data: Dict[str, Any], model: clearskies.Model) -> Dict[str, Any]:
-        return getattr(self.stripe, model.table_name()).update(model.get(model.id_column_alt_name), data)
+        return getattr(self.stripe, model.table_name()).update(model.id, data, environment=model.environment)
 
     def create(self, data: Dict[str, Any], model: clearskies.Model) -> Dict[str, Any]:
-        return getattr(self.stripe, model.table_name()).create(data)
+        environment = data.get("environment", None)
+        result = getattr(self.stripe, model.table_name()).create(data, environment=environment)
+        result["environment"] = environment
+        return result
 
     def delete(self, id: str, model: clearskies.Model) -> bool:
-        return getattr(self.stripe, model.table_name()).delete(model.get(model.id_column_alt_name))
+        # the payment method uses detach rather than delete
+        table_name = model.table_name()
+        if table_name == "payment_methods":
+            return self.stripe.payment_methods.detach(model.id, environment=model.environment)
+        else:
+            return getattr(self.stripe, table_name).delete(model.id, environment=model.environment)
 
     def count(self, configuration: Dict[str, Any], model: clearskies.Model) -> int:
         # not accurate, but a starting point for now.
@@ -64,7 +72,10 @@ class StripeSdkBackend(Backend):
         if results.get("has_more"):
             next_page_data["starting_after"] = results["data"][-1]["id"]
 
-        return results["data"]
+        # add the environment back to each record.  We'll need it for future
+        # update/delete operations.
+        records = [{**record, "environment": environment} for record in results["data"]]
+        return records
 
     def validate_pagination_kwargs(self, kwargs: Dict[str, Any], case_mapping: Callable) -> str:
         extra_keys = set(kwargs.keys()) - set(self.allowed_pagination_keys())
