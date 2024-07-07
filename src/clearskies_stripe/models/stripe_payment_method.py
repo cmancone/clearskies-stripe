@@ -1,8 +1,9 @@
+import stripe
 import clearskies
 from clearskies.column_types import boolean, string, timestamp
 from .column_types import stripe_object
 from collections import OrderedDict
-
+from ..exceptions import PaymentFailure
 
 class StripePaymentMethod(clearskies.Model):
     id_column_alt_name = "payment_method"
@@ -30,7 +31,7 @@ class StripePaymentMethod(clearskies.Model):
             ]
         )
 
-    def charge_off_session(self, amount):
+    def charge_off_session(self, amount, environment=None):
         """
         Make an off session charge against the payment method.
 
@@ -42,9 +43,20 @@ class StripePaymentMethod(clearskies.Model):
             raise ValueError("Cannot create a charge for a non-existent payment method")
 
         # grab the stripe object from our backend so I can be lazy and not inject another parameter
-        return self.backend.stripe.payment_intents.create(params={
-            "amount": amount*100,
-            "currency": "usd",
-            "confirm": True,
-            "payment_method": self.id,
-        })
+        try:
+            return self._backend.stripe.payment_intents.create(
+                environment=environment,
+                params={
+                    "customer": self.customer,
+                    "amount": round(amount*100, 0),
+                    "currency": "usd",
+                    "confirm": True,
+                    "payment_method": self.id,
+                    "automatic_payment_methods": {
+                        "enabled": True,
+                        "allow_redirects": "never",
+                    },
+                }
+            )
+        except stripe._error.StripeError as e:
+            raise PaymentFailure(str(e))
