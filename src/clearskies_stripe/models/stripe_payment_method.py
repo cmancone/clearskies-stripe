@@ -48,7 +48,7 @@ class StripePaymentMethod(clearskies.Model):
                 environment=environment,
                 params={
                     "customer": self.customer,
-                    "amount": round(amount*100, 0),
+                    "amount": int(round(amount*100, 0)),
                     "currency": "usd",
                     "confirm": True,
                     "payment_method": self.id,
