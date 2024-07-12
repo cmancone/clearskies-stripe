@@ -27,8 +27,9 @@ class StripeSdkBackend(Backend):
         if "environment" in data:
             environment = data.get("environment", None)
             del data["environment"]
-        result = getattr(self.stripe, model.table_name()).create(data, environment=environment)
-        result["environment"] = environment
+        result = dict(getattr(self.stripe, model.table_name()).create(data, environment=environment))
+        if environment:
+            result["environment"] = environment
         return result
 
     def delete(self, id: str, model: clearskies.Model) -> bool:
