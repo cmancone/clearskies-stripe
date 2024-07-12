@@ -23,7 +23,10 @@ class StripeSdkBackend(Backend):
         return getattr(self.stripe, model.table_name()).update(model.id, data, environment=model.environment)
 
     def create(self, data: Dict[str, Any], model: clearskies.Model) -> Dict[str, Any]:
-        environment = data.get("environment", None)
+        environment = None
+        if "environment" in data:
+            environment = data.get("environment", None)
+            del data["environment"]
         result = getattr(self.stripe, model.table_name()).create(data, environment=environment)
         result["environment"] = environment
         return result
